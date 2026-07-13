@@ -3,6 +3,7 @@
 import { Flex, TextField, Button, Text } from "@radix-ui/themes";
 import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { useForm, Controller } from "react-hook-form";
+import { signIn } from "next-auth/react";
 
 export default function SinginForm() {
   const {
@@ -16,8 +17,19 @@ export default function SinginForm() {
     },
   });
 
-  const onSubmit = handleSubmit((data) => {
-    console.log("Datos del formulario:", data);
+  const onSubmit = handleSubmit(async (data) => {
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false, // Lo manejamos nosotros manualmente
+    });
+
+    if (result?.error) {
+      console.error("Error al iniciar sesión");
+    } else {
+      // Redirigir al dashboard o página principal
+      window.location.href = "/dashboard";
+    }
   });
 
   return (
