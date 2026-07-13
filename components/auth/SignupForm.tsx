@@ -7,7 +7,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useForm, Controller } from "react-hook-form";
 
-export default function SingupForm() {
+export default function SignupForm() {
   const {
     control,
     handleSubmit,
@@ -175,7 +175,7 @@ export default function SingupForm() {
           </Text>
         )}
 
-        <Button>Sing Up</Button>
+        <Button>Sign Up</Button>
       </Flex>
     </form>
   );
