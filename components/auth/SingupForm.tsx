@@ -111,6 +111,10 @@ export default function SingupForm() {
                 message: "Password is Required",
                 value: true,
               },
+              minLength: {
+                message: "Password must be at least 8 characters",
+                value: 8,
+              },
             }}
             render={({ field }) => (
               <TextField.Root
@@ -144,6 +148,10 @@ export default function SingupForm() {
               required: {
                 message: "Confirm Password is Required",
                 value: true,
+              },
+              minLength: {
+                message: "Password must be at least 8 characters",
+                value: 8,
               },
             }}
             render={({ field }) => (
