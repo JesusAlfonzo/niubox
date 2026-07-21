@@ -6,11 +6,17 @@ import {
   PersonIcon,
 } from "@radix-ui/react-icons";
 import { useForm, Controller } from "react-hook-form";
+import { authClient } from "@/lib/auth-clients";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
+  const router = useRouter();
   const {
     control,
     handleSubmit,
+    setError,
+
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -21,8 +27,36 @@ export default function SignupForm() {
     },
   });
 
-  const onSubmit = handleSubmit((data) => {
-    console.log("Datos del formulario:", data);
+  const onSubmit = handleSubmit(async (data) => {
+    const { error } = await authClient.signUp.email({
+      email: data.email,
+      password: data.password,
+      name: data.name,
+      callbackURL: "/dashboard",
+    });
+
+    if (error) {
+      // Error Handling
+      if (error.status === 409 || error.code === "USER_ALREADY_EXISTS") {
+        setError("email", {
+          type: "manual",
+          message: "Email Already Exists",
+        });
+        toast.error("Email Already Exists. Please use a different email.");
+        return;
+      }
+
+      if (error.status === 429) {
+        toast.error("Too many requests. Please try again later.");
+        return;
+      }
+      toast.error(
+        error.message || "An error occurred during sign up. Please try again.",
+      );
+      return;
+    }
+    toast.success("Sign up successful!");
+    router.push("/dashboard");
   });
 
   return (
