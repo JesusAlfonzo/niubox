@@ -3,12 +3,17 @@
 import { Flex, TextField, Button, Text } from "@radix-ui/themes";
 import { EnvelopeClosedIcon, LockClosedIcon } from "@radix-ui/react-icons";
 import { useForm, Controller } from "react-hook-form";
-import { signIn } from "next-auth/react";
+import { authClient } from "@/lib/auth-clients";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SigninForm() {
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -18,18 +23,32 @@ export default function SigninForm() {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    const result = await signIn("credentials", {
+    const { error } = await authClient.signIn.email({
       email: data.email,
       password: data.password,
-      redirect: false, // Lo manejamos nosotros manualmente
+      callbackURL: "/dashboard",
     });
-
-    if (result?.error) {
-      console.error("Error al iniciar sesión");
-    } else {
-      // Redirigir al dashboard o página principal
-      window.location.href = "/dashboard";
+    if (error) {
+      // Error Handling
+      if (error.status === 401 || error.code === "INVALID_CREDENTIALS") {
+        setError("email", {
+          type: "manual",
+          message: "Invalid Email or password",
+        });
+        toast.error("Invalid Email or Password, Try Again.");
+        return;
+      }
+      if (error.status === 429) {
+        setError("email", {
+          type: "manual",
+          message: "Too many requests. Please try again later.",
+        });
+        toast.error("Too many requests. Please try again later.");
+        return;
+      }
     }
+    toast.success("Sign in successful!");
+    router.push("/dashboard");
   });
 
   return (
